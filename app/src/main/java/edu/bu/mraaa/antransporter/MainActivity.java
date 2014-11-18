@@ -10,6 +10,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.os.Build;
+import android.widget.Button;
+import android.widget.TextView;
 
 
 public class MainActivity extends Activity {
@@ -54,6 +56,9 @@ public class MainActivity extends Activity {
      */
     public static class PlaceholderFragment extends Fragment {
 
+        private TextView btnFindMyBus;
+        private TextView btnFindMyStop;
+
         public PlaceholderFragment() {
         }
 
@@ -61,6 +66,25 @@ public class MainActivity extends Activity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
+            btnFindMyBus = (TextView) rootView.findViewById(R.id.btnFindMyBus);
+            btnFindMyBus.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //create BusRouteFragment
+                    System.out.println("Find My Bus Clicked !!");
+                }
+            });
+
+            btnFindMyStop = (TextView) rootView.findViewById(R.id.btnFindMyStop);
+            btnFindMyStop.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //create MapFragment
+                    System.out.println("Find My Stop Clicked !!");
+                }
+            });
+
             return rootView;
         }
     }

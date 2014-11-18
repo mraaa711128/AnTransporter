@@ -20,13 +20,15 @@
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="@android:color/white"
-        android:textColorHighlight="@android:color/holo_blue_light" />
+        android:textColorHighlight="@android:color/holo_blue_light"
+        android:enabled="true"
+        android:clickable="true" />
 
     <TextView
         android:layout_width="200dp"
         android:layout_height="230dp"
         android:text="@string/button_findmystop"
-        android:id="@+id/textView2"
+        android:id="@+id/btnFindMyStop"
         android:layout_below="@+id/btnFindMyBus"
         android:layout_centerHorizontal="true"
         android:drawableTop="@drawable/imgfindmystop"
@@ -35,5 +37,7 @@
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="@android:color/white"
-        android:textColorHighlight="@android:color/holo_blue_light" />
+        android:textColorHighlight="@android:color/holo_blue_light"
+        android:clickable="true"
+        android:enabled="true" />
 </RelativeLayout>

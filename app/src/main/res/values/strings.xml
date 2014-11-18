@@ -5,8 +5,10 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_main">AnTransporter</string>
     <string name="button_findmybus">Find My Bus</string>
     <string name="button_findmystop">Find My Stop</string>
+    <string name="listview_empty">Bus Routes Not Found !</string>
+    <string name="title_fragment_busroute_list">Bus Route List</string>
 
 </resources>
