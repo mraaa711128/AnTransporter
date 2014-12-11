@@ -3,7 +3,12 @@ package edu.bu.mraaa.antransporter;
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,8 +18,13 @@ import android.os.Build;
 import android.widget.Button;
 import android.widget.TextView;
 
+import edu.bu.mraaa.antransporter.db.MbtaDbService;
+import edu.bu.mraaa.antransporter.db.MbtaDbServiceDelegate;
 
-public class MainActivity extends Activity {
+
+public class MainActivity extends Activity implements MbtaDbServiceDelegate{
+
+    ProgressDialog progDiag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,8 +35,16 @@ public class MainActivity extends Activity {
                     .add(R.id.container, new PlaceholderFragment())
                     .commit();
         }
+
+        MbtaDbService dbService = MbtaDbService.sharedService(this);
+        dbService.setDelegte(this);
+        dbService.initial();
     }
 
+    @Override
+    public View onCreateView(String name, Context context, AttributeSet attrs) {
+        return super.onCreateView(name, context, attrs);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -49,7 +67,47 @@ public class MainActivity extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
-        
+
+    @Override
+    public void dbPreCreate() {
+        progDiag = ProgressDialog.show(this,"Prepare Data","Data Preparing ... ");
+        progDiag.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progDiag.setProgressNumberFormat("(%1d/%2d)");
+    }
+
+    @Override
+    public void dbCreateProgressing(Long progressValue, Long maxValue) {
+        if (progDiag != null) {
+            progDiag.setMax(maxValue.intValue());
+            progDiag.setProgress(progressValue.intValue());
+        }
+    }
+
+    @Override
+    public void dbCreateSuccess() {
+        if (progDiag != null) {
+            progDiag.setMessage("Success !");
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException e) {
+
+            }
+            progDiag.dismiss();
+        }
+    }
+
+    @Override
+    public void dbCreateFail() {
+        if (progDiag != null) {
+            progDiag.setMessage("Fail !");
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException e) {
+
+            }
+            progDiag.dismiss();
+        }
+    }
 
     /**
      * A placeholder fragment containing a simple view.
@@ -73,6 +131,15 @@ public class MainActivity extends Activity {
                 public void onClick(View v) {
                     //create BusRouteFragment
                     System.out.println("Find My Bus Clicked !!");
+
+                    FragmentManager fm = getActivity().getFragmentManager();
+                    Fragment fragment = new BusRouteFragment();
+                    FragmentTransaction ft = fm.beginTransaction();
+                    //ft.setCustomAnimations(R.anim.fragment_animation_in,R.anim.fragment_animation_out);
+                    ft.setCustomAnimations(R.anim.fragment_slide_in_from_right,R.anim.fragment_slide_out_to_left);
+                    ft.replace(R.id.container, fragment, "fragmentBusRoutes");
+                    ft.addToBackStack("fragmentBusRoutes");
+                    ft.commit();
                 }
             });
 

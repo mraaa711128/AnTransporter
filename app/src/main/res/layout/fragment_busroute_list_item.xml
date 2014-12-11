@@ -15,39 +15,94 @@
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp" />
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white">
+        android:background="@android:color/holo_orange_dark">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:id="@+id/imageView"
+            android:layout_alignBottom="@+id/txtRouteCode"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/imgfindmystop" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Large Text"
+            android:text="Text"
             android:id="@+id/txtRouteCode"
             android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="10dp" />
+            android:layout_alignParentLeft="false"
+            android:layout_alignParentStart="false"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_toRightOf="@+id/imageView"
+            android:textColor="@android:color/white"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="   In:"
+            android:id="@+id/textView"
+            android:layout_alignLeft="@+id/txtRouteCode"
+            android:layout_alignStart="@+id/txtRouteCode"
+            android:layout_below="@+id/txtRouteCode"
+            android:layout_marginTop="3dp"
+            android:textColor="@android:color/white"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Out:"
+            android:id="@+id/textView2"
+            android:layout_alignParentBottom="false"
+            android:layout_alignLeft="@+id/txtRouteCode"
+            android:layout_alignStart="@+id/txtRouteCode"
+            android:layout_below="@+id/textView"
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="10dp"
+            android:textColor="@android:color/white"
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="Small Text"
-            android:id="@+id/txtRouteDesc"
-            android:layout_alignParentTop="false"
-            android:layout_alignLeft="@+id/txtRouteCode"
-            android:layout_alignStart="@+id/txtRouteCode"
-            android:layout_below="@+id/txtRouteCode"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="10dp" />
+            android:id="@+id/txtInHeadSign"
+            android:layout_alignTop="@+id/textView"
+            android:layout_toRightOf="@+id/textView2"
+            android:layout_toEndOf="@+id/textView2"
+            android:layout_marginLeft="5dp"
+            android:singleLine="true"
+            android:textColor="@android:color/white" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Small Text"
+            android:id="@+id/txtOutHeadSign"
+            android:layout_alignBottom="@+id/textView2"
+            android:layout_alignLeft="@+id/txtInHeadSign"
+            android:layout_alignStart="@+id/txtInHeadSign"
+            android:singleLine="true"
+            android:textColor="@android:color/white" />
+
     </RelativeLayout>
 
 </RelativeLayout>
