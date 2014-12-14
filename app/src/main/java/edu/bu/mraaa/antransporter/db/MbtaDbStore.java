@@ -77,7 +77,7 @@ public class MbtaDbStore extends SQLiteOpenHelper {
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         super.onDowngrade(db, oldVersion, newVersion);
-        //copyDbFileFromAssets();
+        copyDbFileFromAssets();
     }
 
     public void setDelegate(MbtaDbStoreDelegate delegate) {
@@ -99,24 +99,30 @@ public class MbtaDbStore extends SQLiteOpenHelper {
                     desChannel.close();
 */
                     InputStream dbInput = mContext.getAssets().open(DB_NAME);
-                    OutputStream fileOutput = new FileOutputStream(DB_PATH + DB_NAME);
+                    File dbFile = mContext.getDatabasePath(DB_NAME);
+                    if (dbFile == null) {
+                        OutputStream fileOutput = new FileOutputStream(dbFile);
 
-                    byte[] buffer = new byte[1024];
-                    int length = 0;
-                    Long totalLength = new Long(0);
+                        byte[] buffer = new byte[1024];
+                        int length = 0;
+                        Long totalLength = new Long(0);
 
-                    while ((length = dbInput.read(buffer)) > 0) {
-                        fileOutput.write(buffer,0,length);
-                        totalLength = totalLength + length;
-                        this.publishProgress(totalLength,new Long(dbInput.available()));
+                        while ((length = dbInput.read(buffer)) > 0) {
+                            fileOutput.write(buffer,0,length);
+                            totalLength = totalLength + length;
+                            //this.publishProgress(totalLength,new Long(dbInput.available()));
+                        }
+
+                        fileOutput.flush();
+                        fileOutput.close();
+                        dbInput.close();
                     }
-
-                    fileOutput.flush();
-                    fileOutput.close();
-                    dbInput.close();
 
                     return 0;
                 } catch (IOException e) {
+                    System.out.print(e.getMessage());
+                    return -1;
+                } catch (Exception e) {
                     System.out.print(e.getMessage());
                     return -1;
                 }

@@ -10,5 +10,6 @@
     <string name="button_findmystop">Find My Stop</string>
     <string name="listview_empty">Bus Routes Not Found !</string>
     <string name="title_fragment_busroute_list">Bus Route List</string>
+    <string name="stoplist_empty">Bus Stops Not Found !</string>
 
 </resources>

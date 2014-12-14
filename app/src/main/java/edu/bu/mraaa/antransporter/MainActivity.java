@@ -18,6 +18,9 @@ import android.os.Build;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.MapsInitializer;
+
 import edu.bu.mraaa.antransporter.db.MbtaDbService;
 import edu.bu.mraaa.antransporter.db.MbtaDbServiceDelegate;
 
@@ -39,6 +42,9 @@ public class MainActivity extends Activity implements MbtaDbServiceDelegate{
         MbtaDbService dbService = MbtaDbService.sharedService(this);
         dbService.setDelegte(this);
         dbService.initial();
+
+        MapsInitializer.initialize(this);
+
     }
 
     @Override
@@ -72,7 +78,7 @@ public class MainActivity extends Activity implements MbtaDbServiceDelegate{
     public void dbPreCreate() {
         progDiag = ProgressDialog.show(this,"Prepare Data","Data Preparing ... ");
         progDiag.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progDiag.setProgressNumberFormat("(%1d/%2d)");
+        //progDiag.setProgressNumberFormat("(%1d/%2d)");
     }
 
     @Override
@@ -86,12 +92,6 @@ public class MainActivity extends Activity implements MbtaDbServiceDelegate{
     @Override
     public void dbCreateSuccess() {
         if (progDiag != null) {
-            progDiag.setMessage("Success !");
-            try {
-                Thread.sleep(1500);
-            } catch (InterruptedException e) {
-
-            }
             progDiag.dismiss();
         }
     }
@@ -99,12 +99,7 @@ public class MainActivity extends Activity implements MbtaDbServiceDelegate{
     @Override
     public void dbCreateFail() {
         if (progDiag != null) {
-            progDiag.setMessage("Fail !");
-            try {
-                Thread.sleep(1500);
-            } catch (InterruptedException e) {
-
-            }
+            //progDiag.setMessage("Fail !");
             progDiag.dismiss();
         }
     }
@@ -149,6 +144,15 @@ public class MainActivity extends Activity implements MbtaDbServiceDelegate{
                 public void onClick(View v) {
                     //create MapFragment
                     System.out.println("Find My Stop Clicked !!");
+
+                    FragmentManager fm = getActivity().getFragmentManager();
+                    Fragment fragment = new BusStopMapFragment();
+                    FragmentTransaction ft = fm.beginTransaction();
+                    //ft.setCustomAnimations(R.anim.fragment_animation_in,R.anim.fragment_animation_out);
+                    ft.setCustomAnimations(R.anim.fragment_slide_in_from_right,R.anim.fragment_slide_out_to_left);
+                    ft.replace(R.id.container, fragment, "fragmentBusStopMap");
+                    ft.addToBackStack("fragmentBusStopMap");
+                    ft.commit();
                 }
             });
 

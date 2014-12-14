@@ -101,7 +101,7 @@ public class MbtaService implements HttpRequestDelegate {
         reqStopsByRoute.execute(reqStopsByRouteUrl);
     }
 
-    public synchronized void gtStopsByLocation(double latitude, double lontitue, MbtaServiceDelegate delegate) {
+    public synchronized void getStopsByLocation(double latitude, double lontitue, MbtaServiceDelegate delegate) {
         URL reqStopsByLocUrl = getRequestUrl(ServiceId.stopsbylocation,latitude,lontitue);
         HttpRequest reqStopsByLoc = new HttpRequest();
         reqStopsByLoc.setServiceId(ServiceId.stopsbylocation);
@@ -112,7 +112,7 @@ public class MbtaService implements HttpRequestDelegate {
     }
 
     public synchronized void getScheduleByStop(String stop, String route, String direction,
-                                               Integer datetime, Integer maxtime, Integer maxtrips, MbtaServiceDelegate delegate) {
+                                               Long datetime, Integer maxtime, Integer maxtrips, MbtaServiceDelegate delegate) {
         URL reqSchByStopUrl = getRequestUrl(ServiceId.schedulebystop,stop,route,direction,datetime,maxtime,maxtrips);
         HttpRequest reqSchByStop = new HttpRequest();
         reqSchByStop.setServiceId(ServiceId.schedulebystop);
@@ -122,7 +122,7 @@ public class MbtaService implements HttpRequestDelegate {
         reqSchByStop.execute(reqSchByStopUrl);
     }
 
-    public synchronized void getScheduleByRoute(String route, String direction, Integer datetime,
+    public synchronized void getScheduleByRoute(String route, String direction, Long datetime,
                                                 Integer maxtime, Integer maxtrips, MbtaServiceDelegate delegate) {
         URL reqSchByRouteUrl = getRequestUrl(ServiceId.schedulebyroute,route,direction,datetime,maxtime,maxtrips);
         HttpRequest reqSchByRoute = new HttpRequest();
@@ -405,13 +405,13 @@ public class MbtaService implements HttpRequestDelegate {
         }
         for (int i = 0; i < paras.size(); i++) {
             if (values[i] != null) {
-                strReturn = strReturn + paras.get(i) + "=" + String.valueOf(values[i]) + "&";
+                String strValue = "";
+                try {
+                    strValue = URLEncoder.encode(String.valueOf(values[i]), "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                }
+                strReturn = strReturn + paras.get(i) + "=" + strValue + "&";
             }
-        }
-        try {
-            strReturn = URLEncoder.encode(strReturn,"UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            strReturn = "";
         }
         return strReturn;
     }
