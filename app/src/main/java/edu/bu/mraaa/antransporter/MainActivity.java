@@ -25,7 +25,7 @@ import edu.bu.mraaa.antransporter.db.MbtaDbService;
 import edu.bu.mraaa.antransporter.db.MbtaDbServiceDelegate;
 
 
-public class MainActivity extends Activity implements MbtaDbServiceDelegate{
+public class MainActivity extends Activity implements MbtaDbServiceDelegate, FragmentManager.OnBackStackChangedListener {
 
     ProgressDialog progDiag;
 
@@ -45,6 +45,8 @@ public class MainActivity extends Activity implements MbtaDbServiceDelegate{
 
         MapsInitializer.initialize(this);
 
+        getFragmentManager().addOnBackStackChangedListener(this);
+        shouldDisplayUpButton();
     }
 
     @Override
@@ -72,6 +74,29 @@ public class MainActivity extends Activity implements MbtaDbServiceDelegate{
 //        }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackStackChanged() {
+        shouldDisplayUpButton();
+    }
+
+    private void shouldDisplayUpButton() {
+        boolean canBack = (getFragmentManager().getBackStackEntryCount() > 0);
+        getActionBar().setDisplayHomeAsUpEnabled(canBack);
+    }
+
+    @Override
+    public boolean onNavigateUp() {
+        //return super.onNavigateUp();
+        getFragmentManager().popBackStack();
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        //getFragmentManager().popBackStack(R.id.container,0);
+        super.onBackPressed();
     }
 
     @Override
