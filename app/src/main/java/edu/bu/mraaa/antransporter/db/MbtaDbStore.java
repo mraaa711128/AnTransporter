@@ -25,7 +25,7 @@ import edu.bu.mraaa.antransporter.R;
  * Created by mraaa711128 on 12/1/14.
  */
 public class MbtaDbStore extends SQLiteOpenHelper {
-    private static final int DB_VER = 1;
+    private static final int DB_VER = 2;
     private static final String DB_NAME = "MbtaDbStore.db";
     private static final String DB_PATH = "/data/data/edu.bu.mraaa.antransporter/databases/";
     private static final String DB_APK_PATH = "/assets/";
@@ -100,23 +100,22 @@ public class MbtaDbStore extends SQLiteOpenHelper {
 */
                     InputStream dbInput = mContext.getAssets().open(DB_NAME);
                     File dbFile = mContext.getDatabasePath(DB_NAME);
-                    if (dbFile == null) {
-                        OutputStream fileOutput = new FileOutputStream(dbFile);
 
-                        byte[] buffer = new byte[1024];
-                        int length = 0;
-                        Long totalLength = new Long(0);
+                    OutputStream fileOutput = new FileOutputStream(dbFile);
 
-                        while ((length = dbInput.read(buffer)) > 0) {
-                            fileOutput.write(buffer,0,length);
-                            totalLength = totalLength + length;
-                            //this.publishProgress(totalLength,new Long(dbInput.available()));
-                        }
+                    byte[] buffer = new byte[1024];
+                    int length = 0;
+                    Long totalLength = new Long(0);
 
-                        fileOutput.flush();
-                        fileOutput.close();
-                        dbInput.close();
+                    while ((length = dbInput.read(buffer)) > 0) {
+                        fileOutput.write(buffer,0,length);
+                        totalLength = totalLength + length;
+                        this.publishProgress(totalLength,new Long(dbInput.available()));
                     }
+
+                    fileOutput.flush();
+                    fileOutput.close();
+                    dbInput.close();
 
                     return 0;
                 } catch (IOException e) {
