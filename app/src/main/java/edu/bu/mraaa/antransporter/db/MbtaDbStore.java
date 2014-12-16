@@ -110,7 +110,7 @@ public class MbtaDbStore extends SQLiteOpenHelper {
                     while ((length = dbInput.read(buffer)) > 0) {
                         fileOutput.write(buffer,0,length);
                         totalLength = totalLength + length;
-                        this.publishProgress(totalLength,new Long(dbInput.available()));
+                        //this.publishProgress(totalLength,new Long(dbInput.available()));
                     }
 
                     fileOutput.flush();
