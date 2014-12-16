@@ -188,6 +188,11 @@ public class BusStopMapFragment extends Fragment implements MbtaServiceDelegate,
             mMap = googleMap;
             mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
             mMap.setOnInfoWindowClickListener(this);
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setCompassEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            mMap.getUiSettings().setZoomControlsEnabled(true);
+            mMap.getUiSettings().setZoomGesturesEnabled(true);
 
             mMarkers = new HashMap<Marker, JSONObject>();
             mNearStops = new HashMap<String, JSONObject>();
@@ -265,11 +270,12 @@ public class BusStopMapFragment extends Fragment implements MbtaServiceDelegate,
                         JSONObject objStop = mNearStops.get(objStopId);
                         JSONArray arrRoutes = arrModes.getJSONObject(i).getJSONArray("route");
                         LatLngBounds.Builder boundBuilder = new LatLngBounds.Builder();
-                        String infoTitle = objStop.getString("stop_name") + "\n";
+                        String infoTitle = objStop.getString("stop_name") + " (";
                         for (int j = 0; j < arrRoutes.length(); j++) {
-                            infoTitle = infoTitle +
-                                        arrRoutes.getJSONObject(j).getString("route_id") + "\n";
+                            infoTitle = infoTitle +  (j == 0 ? "":",") +
+                                        arrRoutes.getJSONObject(j).getString("route_id");
                         }
+                        infoTitle = infoTitle + ")";
                         objStop.put("route",arrRoutes);
                         double lat = objStop.getDouble("stop_lat");
                         double lon = objStop.getDouble("stop_lon");
@@ -280,7 +286,7 @@ public class BusStopMapFragment extends Fragment implements MbtaServiceDelegate,
                         boundBuilder.include(mk.getPosition());
                         LatLngBounds mapBound = boundBuilder.build();
                         //CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(mapBound,10);
-                        CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(mapBound.getCenter(),14);
+                        CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(mapBound.getCenter(),13);
                         mMap.moveCamera(cu);
                     }
                 }

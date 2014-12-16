@@ -143,7 +143,7 @@ public class MbtaService implements HttpRequestDelegate {
         reqSchByTrip.execute(reqSchByTripUrl);
     }
 
-    public synchronized void getPredictionByStop(String stop, boolean includeaccessalerts,
+    public synchronized void getPredictionsByStop(String stop, boolean includeaccessalerts,
                                                  boolean includeservicealerts, MbtaServiceDelegate delegate) {
         URL reqPredByStopUrl = getRequestUrl(ServiceId.predictionsbystop,stop,includeaccessalerts,includeservicealerts);
         HttpRequest reqPredByStop = new HttpRequest();
@@ -154,8 +154,8 @@ public class MbtaService implements HttpRequestDelegate {
         reqPredByStop.execute(reqPredByStopUrl);
     }
 
-    public synchronized void getPredictionByRoute(String route, boolean includeaccessalerts,
-                                                  boolean includeservicealerts, MbtaServiceDelegate delegate) {
+    public synchronized void getPredictionsByRoute(String route, Boolean includeaccessalerts,
+                                                  Boolean includeservicealerts, MbtaServiceDelegate delegate) {
         URL reqPredByRouteUrl = getRequestUrl(ServiceId.predictionsbyroute,route,includeaccessalerts,includeservicealerts);
         HttpRequest reqPredByRoute = new HttpRequest();
         reqPredByRoute.setServiceId(ServiceId.predictionsbyroute);
@@ -165,7 +165,7 @@ public class MbtaService implements HttpRequestDelegate {
         reqPredByRoute.execute(reqPredByRouteUrl);
     }
 
-    public synchronized void getPredictionByTrip(String trip, MbtaServiceDelegate delegate) {
+    public synchronized void getPredictionsByTrip(String trip, MbtaServiceDelegate delegate) {
         URL reqPredByTripUrl = getRequestUrl(ServiceId.predictionsbytrip,trip);
         HttpRequest reqPredByTrip = new HttpRequest();
         reqPredByTrip.setServiceId(ServiceId.predictionsbytrip);
@@ -298,13 +298,13 @@ public class MbtaService implements HttpRequestDelegate {
                 strReturn = "schedulebytrip";
                 break;
             case predictionsbystop:
-                strReturn = "predictionbystop";
+                strReturn = "predictionsbystop";
                 break;
             case predictionsbyroute:
-                strReturn = "predictionbyroute";
+                strReturn = "predictionsbyroute";
                 break;
             case predictionsbytrip:
-                strReturn = "predictionbytrip";
+                strReturn = "predictionsbytrip";
                 break;
             case vehiclesbyroute:
                 strReturn = "vehiclesbyroute";

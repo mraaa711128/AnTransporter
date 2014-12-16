@@ -8,6 +8,8 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 
+import edu.bu.mraaa.antransporter.BuildConfig;
+
 
 /**
  * Created by mraaa711128 on 12/13/14.
@@ -35,6 +37,11 @@ public class LocationService extends Object implements LocationListener {
     private LocationService(Context context) {
         mContext = context;
         mLocMgr = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+        if (BuildConfig.DEBUG) {
+            mLocation = new Location(LocationManager.GPS_PROVIDER);
+            mLocation.setLatitude(42.348719);
+            mLocation.setLongitude(-71.095105);
+        }
     }
 
     public boolean isServiceAvailable() {

@@ -24,13 +24,37 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="ETA:"
-            android:id="@+id/textView3"
+            android:text="Schedule:"
+            android:id="@+id/textView5"
             android:layout_below="@+id/txtStopName"
             android:layout_marginLeft="15dp"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="10dp"
             android:textColor="@android:color/white" />
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="20:35"
+            android:id="@+id/txtSchedule"
+            android:layout_toRightOf="@+id/textView5"
+            android:layout_alignTop="@+id/textView5"
+            android:layout_marginLeft="5dp"
+            android:textColor="@android:color/white" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="ETA:"
+            android:id="@+id/textView3"
+            android:layout_marginLeft="15dp"
+            android:textColor="@android:color/white"
+            android:layout_alignTop="@+id/txtSchedule"
+            android:layout_toRightOf="@+id/txtSchedule" />
+
 
         <TextView
             android:layout_width="wrap_content"
@@ -66,13 +90,15 @@
             android:textColor="@android:color/white" />
 
         <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:id="@+id/imgBusSign"
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:layout_marginRight="10dp" />
+            android:layout_marginRight="10dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="10dp" />
     </RelativeLayout>
 
 </RelativeLayout>

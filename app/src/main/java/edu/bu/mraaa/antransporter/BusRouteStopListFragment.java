@@ -6,11 +6,13 @@ import android.content.Context;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.text.format.Time;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -22,11 +24,17 @@ import org.w3c.dom.Text;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 
 import edu.bu.mraaa.antransporter.api.MbtaService;
 import edu.bu.mraaa.antransporter.api.MbtaServiceDelegate;
+import edu.bu.mraaa.antransporter.db.MbtaTabCalendar;
 import edu.bu.mraaa.antransporter.service.LocationService;
 
 /**
@@ -63,7 +71,10 @@ public class BusRouteStopListFragment extends ListFragment implements MbtaServic
             String strBusStops = getItem.getString("BusStops");
             mBusStops = new JSONObject(strBusStops);
 
+
             MbtaService service = MbtaService.sharedService();
+            service.getPredictionsByRoute(mBusRoute.getString("route_id"), null, null, this);
+/*
             LocationService locService = LocationService.sharedService(this.getActivity());
             if (locService.isServiceAvailable()) {
                 Location newLoc = locService.getLocation();
@@ -85,6 +96,7 @@ public class BusRouteStopListFragment extends ListFragment implements MbtaServic
             } else {
                 throw new Exception("Location Service is Unavailable !");
             }
+*/
 
         } catch (JSONException e) {
             showAlertDialogFragment("Error",e.getMessage());
@@ -107,7 +119,7 @@ public class BusRouteStopListFragment extends ListFragment implements MbtaServic
 
     @Override
     public void didQueryServiceBegin(MbtaService.ServiceId serviceId) {
-        if (serviceId == MbtaService.ServiceId.stopsbylocation) {
+        if (serviceId == MbtaService.ServiceId.predictionsbyroute) {
             progDialog = ProgressDialog.show(this.getActivity(), "Load Stops", "Bus Stops Loading ...");
             progDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         }
@@ -115,168 +127,177 @@ public class BusRouteStopListFragment extends ListFragment implements MbtaServic
 
     @Override
     public void didQueryServiceSuccess(MbtaService.ServiceId serviceId, JSONObject result) {
-        MbtaService service = MbtaService.sharedService();
-        if (serviceId == MbtaService.ServiceId.stopsbylocation) {
-            try {
-                JSONObject currentStop = null;
-                JSONArray nearByStops = result.getJSONArray("stop");
-                JSONArray routeStops = mBusStops.getJSONArray("stop");
-                for (int i = 0;i< nearByStops.length();i++) {
-                    JSONObject nearByStop = nearByStops.getJSONObject(i);
-                    for (int j = 0; j < routeStops.length();j ++) {
-                        JSONObject routeStop = routeStops.getJSONObject(j);
-                        if (routeStop.getString("stop_id").contentEquals(nearByStop.getString("stop_id"))) {
-                            currentStop = routeStop;
-                            if (currentStop != null) {
-                                if (BuildConfig.DEBUG) {
-                                    Time now = new Time();
-                                    now.setToNow();
-                                    Time tomorrow = new Time();
-                                    tomorrow.set(now.second,now.minute,now.hour,now.monthDay + 1,now.month,now.year);
-                                    Long epchotime = tomorrow.toMillis(true) / 1000L;
-                                    service.getScheduleByStop(currentStop.getString("stop_id"), mBusRoute.getString("route_id"),
-                                            mBusStops.getString("direction_id"),epchotime, null, null, this);
-                                } else {
-                                    service.getScheduleByStop(currentStop.getString("stop_id"), mBusRoute.getString("route_id"),
-                                            mBusStops.getString("direction_id"), null, null, null, this);
-                                }
-                            } else {
-                                throw new Exception("Can't find Stops around here !");
-                            }
-                            //break;
+        try {
+            MbtaService service = MbtaService.sharedService();
+
+            if (serviceId == MbtaService.ServiceId.predictionsbyroute) {
+                HashMap<String, JSONObject> hashStops = new HashMap<String,JSONObject>();
+
+                JSONArray predDirections = result.getJSONArray("direction");
+                JSONObject predDirection = null;
+                if (predDirections.length() == 2) {
+                    if (mBusStops.getString("direction_id").contentEquals("0")) {
+                        predDirection = result.getJSONArray("direction").getJSONObject(0);
+                    } else {
+                        predDirection = result.getJSONArray("direction").getJSONObject(1);
+                    }
+                } else if (predDirections.length() == 1) {
+                    predDirection = predDirections.getJSONObject(0);
+                    if ((predDirection.getString("direction_id").contentEquals(mBusStops.getString("direction_id"))) == false) {
+                        if (BuildConfig.DEBUG) {
+                            Time now = new Time();
+                            now.setToNow();
+                            Time tomorrow = new Time();
+                            tomorrow.set(now.second,now.minute,now.hour,now.monthDay + 1,now.month,now.year);
+                            Long epchotime = tomorrow.toMillis(false) / 1000L;
+                            service.getScheduleByRoute(mBusRoute.getString("route_id"), mBusStops.getString("direction_id"),epchotime,null,null,this);
+                            return;
+                        } else {
+                            service.getScheduleByRoute(mBusRoute.getString("route_id"), mBusStops.getString("direction_id"),null,null,null,this);
                             return;
                         }
                     }
-                }
-                if (BuildConfig.DEBUG) {
-                    Time now = new Time();
-                    now.setToNow();
-                    Time tomorrow = new Time();
-                    tomorrow.set(now.second,now.minute,now.hour,now.monthDay + 1,now.month,now.year);
-                    Long epchotime = tomorrow.toMillis(true) / 1000L;
-                    service.getScheduleByRoute(mBusRoute.getString("route_id"), mBusStops.getString("direction_id"),epchotime,null,null,this);
                 } else {
-                    service.getScheduleByRoute(mBusRoute.getString("route_id"), mBusStops.getString("direction_id"),null,null,null,this);
-                }
-
-/*
-                if (currentStop != null) {
                     if (BuildConfig.DEBUG) {
                         Time now = new Time();
                         now.setToNow();
                         Time tomorrow = new Time();
                         tomorrow.set(now.second,now.minute,now.hour,now.monthDay + 1,now.month,now.year);
-                        Long epchotime = tomorrow.toMillis(true) / 1000L;
-                        service.getScheduleByStop(currentStop.getString("stop_id"), mBusRoute.getString("route_id"),
-                                mBusStops.getString("direction_id"),epchotime, null, null, this);
+                        Long epchotime = tomorrow.toMillis(false) / 1000L;
+                        service.getScheduleByRoute(mBusRoute.getString("route_id"), mBusStops.getString("direction_id"),epchotime,null,null,this);
+                        return;
                     } else {
-                        service.getScheduleByStop(currentStop.getString("stop_id"), mBusRoute.getString("route_id"),
-                                mBusStops.getString("direction_id"), null, null, null, this);
-                    }
-                } else {
-                    throw new Exception("Can't find Stops around here !");
-                }
-*/
-            } catch (JSONException e) {
-                showAlertDialogFragment("Error",e.getMessage());
-            } catch (Exception e) {
-                showAlertDialogFragment("Error",e.getMessage());
-            }
-        } else if (serviceId == MbtaService.ServiceId.schedulebystop) {
-            try {
-                JSONObject currentTrip = null;
-                JSONArray schModes = result.getJSONArray("mode");
-                for (int i = 0; i < schModes.length(); i++) {
-                    JSONObject schMode = schModes.getJSONObject(i);
-                    if (schMode.getString("route_type").contentEquals("3")) {
-                        JSONArray schRoutes = schMode.getJSONArray("route");
-                        for (int j = 0; j < schRoutes.length(); j++) {
-                            JSONObject schRoute = schRoutes.getJSONObject(j);
-                            if (schRoute.getString("route_id").contentEquals(mBusRoute.getString("route_id"))) {
-                                JSONArray schDirections = schRoute.getJSONArray("direction");
-                                for (int k = 0; k < schDirections.length(); k++) {
-                                    JSONObject schDirection = schDirections.getJSONObject(k);
-                                    if (schDirection.getString("direction_id").contentEquals(mBusStops.getString("direction_id"))) {
-                                        currentTrip = schDirection.getJSONArray("trip").getJSONObject(0);
-                                        if (currentTrip != null) {
-                                            mFoundTrip = currentTrip;
-                                            service.getScheduleByTrip(mFoundTrip.getString("trip_id"), null, this);
-                                        } else {
-                                            throw new Exception("Schedule is Unavailable currently !");
-                                        }
-                                        //break;
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-/*
-                if (currentTrip != null) {
-                    mFoundTrip = currentTrip;
-                    service.getScheduleByTrip(mFoundTrip.getString("trip_id"), null, this);
-                } else {
-                    throw new Exception("Schedule is Unavailable currently !");
-                }
-*/
-            } catch (JSONException e) {
-                showAlertDialogFragment("Error", e.getMessage());
-            } catch (Exception e) {
-                showAlertDialogFragment("Error", e.getMessage());
-            }
-        } else if (serviceId == MbtaService.ServiceId.schedulebyroute) {
-            try {
-                JSONObject currentTrip = null;
-                JSONArray arrDirection = result.getJSONArray("direction");
-                for (int i = 0; i < arrDirection.length(); i++) {
-                    JSONObject schDirection = arrDirection.getJSONObject(i);
-                    if (schDirection.getString("direction_id").contentEquals(mBusStops.getString("direction_id"))) {
-                        currentTrip = schDirection.getJSONArray("trip").getJSONObject(0);
-                        if (currentTrip != null) {
-                            mFoundTrip = currentTrip;
-                            service.getScheduleByTrip(mFoundTrip.getString("trip_id"), null, this);
-                        } else {
-                            throw new Exception("Schedule is Unavailable currently !");
-                        }
-                        //break;
+                        service.getScheduleByRoute(mBusRoute.getString("route_id"), mBusStops.getString("direction_id"),null,null,null,this);
                         return;
                     }
                 }
-                throw new Exception("Schedule is Unavailable currently !");
-/*
-                if (currentTrip != null) {
-                    mFoundTrip = currentTrip;
-                    service.getScheduleByTrip(mFoundTrip.getString("trip_id"), null, this);
-                } else {
-                    throw new Exception("Schedule is Unavailable currently !");
-                }
-*/
-            } catch (JSONException e) {
-                showAlertDialogFragment("Error", e.getMessage());
-            } catch (Exception e) {
-                showAlertDialogFragment("Error", e.getMessage());
-            }
-        } else if (serviceId == MbtaService.ServiceId.schedulebytrip) {
-            try {
+
                 mStopList.clear();
 
-                mRouteSchedule = result;
-                JSONArray schStops = mRouteSchedule.getJSONArray("stop");
-                for (int i = 0; i < schStops.length(); i++) {
-                    mStopList.add(schStops.getJSONObject(i));
+                JSONArray predTrips = predDirection.getJSONArray("trip");
+                for (int i = predTrips.length() - 1; i >= 0; i--) {
+                    JSONObject predTrip = predTrips.getJSONObject(i);
+                    JSONArray predStops = predTrip.getJSONArray("stop");
+                    for (int j = 0; j < predStops.length(); j++) {
+                        JSONObject predStop = predStops.getJSONObject(j);
+                        if (hashStops.containsKey(predStop.getString("stop_id"))) {
+                            JSONObject hashStop = hashStops.get(predStop.getString("stop_id"));
+                            String pred_pre_away = predStop.getString("pre_away");
+                            String hash_pre_away = hashStop.getString("pre_away");
+                            if (Integer.valueOf(pred_pre_away) < Integer.valueOf(hash_pre_away)) {
+                                hashStop.put("sch_arr_dt", predStop.getString("sch_arr_dt"));
+                                hashStop.put("sch_dep_dt", predStop.getString("sch_dep_dt"));
+                                hashStop.put("pre_dt", predStop.getString("pre_dt"));
+                                hashStop.put("pre_away", predStop.getString("pre_away"));
+                                if (mStopList.contains(hashStop)) {
+                                    int idx = mStopList.indexOf(hashStop);
+                                    mStopList.get(idx).put("sch_arr_dt", predStop.getString("sch_arr_dt"));
+                                    mStopList.get(idx).put("sch_dep_dt", predStop.getString("sch_dep_dt"));
+                                    mStopList.get(idx).put("pre_dt", predStop.getString("pre_dt"));
+                                    mStopList.get(idx).put("pre_away", predStop.getString("pre_away"));
+                                }
+                            }
+                        } else {
+                            hashStops.put(predStop.getString("stop_id"), predStop);
+                            mStopList.add(predStop);
+                        }
+                    }
                 }
+                if (mStopList.size() > 0) {
+                    BusRouteStopAdapter busRouteAdp = new BusRouteStopAdapter(mStopList);
+                    busRouteAdp.setNotifyOnChange(true);
+                    setListAdapter(busRouteAdp);
+                    viewBusRouteStopList.setVisibility(View.VISIBLE);
+                } else {
+                    if (BuildConfig.DEBUG) {
+                        Time now = new Time();
+                        now.setToNow();
+                        Time tomorrow = new Time();
+                        tomorrow.set(now.second,now.minute,now.hour,now.monthDay + 1,now.month,now.year);
+                        Long epchotime = tomorrow.toMillis(false) / 1000L;
+                        service.getScheduleByRoute(mBusRoute.getString("route_id"), mBusStops.getString("direction_id"),epchotime,null,null,this);
+                    } else {
+                        service.getScheduleByRoute(mBusRoute.getString("route_id"), mBusStops.getString("direction_id"),null,null,null,this);
+                    }
+                }
+            } else if (serviceId == MbtaService.ServiceId.schedulebyroute) {
+                JSONArray schDirections = result.getJSONArray("direction");
+                JSONObject schDirection = null;
 
-                BusRouteStopAdapter busRtStopAdp = new BusRouteStopAdapter(mStopList);
-                busRtStopAdp.setNotifyOnChange(true);
-                setListAdapter(busRtStopAdp);
+                if (schDirections.length() == 2) {
+                    if (mBusStops.getString("direction_id").contentEquals("0")) {
+                        schDirection = schDirections.getJSONObject(0);
+                    } else {
+                        schDirection = schDirections.getJSONObject(1);
+                    }
+                } else if (schDirections.length() == 1) {
+                    schDirection = schDirections.getJSONObject(0);
+                    if ((schDirection.getString("direction_id").contentEquals(mBusStops.getString("direction_id"))) == false) {
+                        service.getStopsByRoute(mBusRoute.getString("route_id"),this);
+                        return;
+                    }
+                } else {
+                    service.getStopsByRoute(mBusRoute.getString("route_id"),this);
+                    return;
+                }
+                mStopList.clear();
+                JSONArray predTrips = schDirection.getJSONArray("trip");
+                if (predTrips.length() > 0) {
+                    JSONObject predTrip = predTrips.getJSONObject(0);
+                    JSONArray predStops = predTrip.getJSONArray("stop");
+                    for (int j = 0; j < predStops.length(); j++) {
+                        JSONObject predStop = predStops.getJSONObject(j);
+                        predStop.put("pre_dt",predStop.getString("sch_arr_dt"));
+                        predStop.put("pre_away","-1");
+                        mStopList.add(predStop);
+                    }
+                }
+                if (mStopList.size() > 0) {
+                    BusRouteStopAdapter busRouteAdp = new BusRouteStopAdapter(mStopList);
+                    busRouteAdp.setNotifyOnChange(true);
+                    setListAdapter(busRouteAdp);
+                    viewBusRouteStopList.setVisibility(View.VISIBLE);
+                } else {
+                    service.getStopsByRoute(mBusRoute.getString("route_id"),this);
+                }
+            } else if (serviceId == MbtaService.ServiceId.stopsbyroute) {
+                JSONArray routeDirections = result.getJSONArray("direction");
+                JSONObject routeDirection = null;
+
+                if (routeDirections.length() == 2) {
+                    if (mBusStops.getString("direction_id").contentEquals("0")) {
+                        routeDirection = routeDirections.getJSONObject(0);
+                    } else {
+                        routeDirection = routeDirections.getJSONObject(1);
+                    }
+                } else if (routeDirections.length() == 1) {
+                    routeDirection = routeDirections.getJSONObject(0);
+                    if ((routeDirection.getString("direction_id").contentEquals(mBusStops.getString("direction_id"))) == false) {
+                        throw new Exception("Bus Stops are not available currently !");
+                    }
+                } else {
+                    throw new Exception("Bus Stops are not available currently !");
+                }
+                mStopList.clear();
+                JSONArray routeStops = routeDirection.getJSONArray("stop");
+                for (int i = 0; i< routeStops.length(); i++) {
+                    JSONObject routeStop = routeStops.getJSONObject(i);
+                    routeStop.put("sch_arr_dt","0");
+                    routeStop.put("pre_dt","0");
+                    routeStop.put("pre_away","-1");
+                    mStopList.add(routeStop);
+                }
+                BusRouteStopAdapter busRouteAdp = new BusRouteStopAdapter(mStopList);
+                busRouteAdp.setNotifyOnChange(true);
+                setListAdapter(busRouteAdp);
                 viewBusRouteStopList.setVisibility(View.VISIBLE);
-                if (progDialog != null) {progDialog.dismiss();}
-            } catch (JSONException e) {
-                showAlertDialogFragment("Error",e.getMessage());
-            } catch (Exception e) {
-                showAlertDialogFragment("Error",e.getMessage());
             }
+        } catch (JSONException e) {
+            showAlertDialogFragment("Error", e.getMessage());
+        } catch (Exception e) {
+            showAlertDialogFragment("Error", e.getMessage());
+        } finally {
+            if (progDialog != null) {progDialog.dismiss();}
         }
     }
 
@@ -287,7 +308,28 @@ public class BusRouteStopListFragment extends ListFragment implements MbtaServic
     }
     @Override
     public void didQueryServiceFail(MbtaService.ServiceId serviceId, Error error) {
-        if (progDialog != null) {progDialog.dismiss();}
+        if (serviceId == MbtaService.ServiceId.predictionsbyroute) {
+            try {
+                MbtaService service = MbtaService.sharedService();
+                if (BuildConfig.DEBUG) {
+                    Time now = new Time();
+                    now.setToNow();
+                    Time tomorrow = new Time();
+                    tomorrow.set(now.second,now.minute,now.hour,now.monthDay + 1,now.month,now.year);
+                    Long epchotime = tomorrow.toMillis(false) / 1000L;
+                    service.getScheduleByRoute(mBusRoute.getString("route_id"), mBusStops.getString("direction_id"),epchotime,null,null,this);
+                } else {
+                    service.getScheduleByRoute(mBusRoute.getString("route_id"), mBusStops.getString("direction_id"),null,null,null,this);
+                }
+            } catch (JSONException e) {
+                showAlertDialogFragment("Error",e.getMessage());
+            }
+        } else {
+            if (progDialog != null) {
+                progDialog.dismiss();
+            }
+            showAlertDialogFragment("Error", error.getMessage());
+        }
     }
 
     @Override
@@ -307,25 +349,55 @@ public class BusRouteStopListFragment extends ListFragment implements MbtaServic
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.fragment_busroutestop_list_item,parent,false);
             }
             TextView txtStopName = (TextView)convertView.findViewById(R.id.txtStopName);
+            TextView txtSchedule = (TextView)convertView.findViewById(R.id.txtSchedule);
             TextView txtETA = (TextView)convertView.findViewById(R.id.txtETA);
             TextView txtNextBus = (TextView)convertView.findViewById(R.id.txtNextBus);
+            ImageView imgBus = (ImageView)convertView.findViewById(R.id.imgBusSign);
 
             JSONObject busRouteStop = getItem(position);
 
             try {
                 txtStopName.setText(busRouteStop.getString("stop_name"));
 
-                Date timeETA = new Date(busRouteStop.getLong("sch_arr_dt") * 1000L);
-                DateFormat formatETA = new SimpleDateFormat("HH:mm");
-                txtETA.setText(formatETA.format(timeETA));
 
-                if (busRouteStop.has("bus_arr_dt")) {
-                    Date timeBus = new Date(busRouteStop.getLong("bus_arr_dt") * 1000L);
+                Long schDt = busRouteStop.getLong("sch_arr_dt");
+                if (schDt > 0) {
+                    Date timeSchedule = new Date(schDt * 1000L);
+                    DateFormat formatSchedule = new SimpleDateFormat("HH:mm");
+                    txtSchedule.setText(formatSchedule.format(timeSchedule));
+                } else {
+                    txtSchedule.setText("");
+                }
+
+                Long preDt = busRouteStop.getLong("pre_dt");
+                if (preDt > 0) {
+                    Date timeETA = new Date(preDt * 1000L);
+                    DateFormat formatETA = new SimpleDateFormat("HH:mm");
+                    txtETA.setText(formatETA.format(timeETA));
+                } else {
+                    txtETA.setText("");
+                }
+
+                Long preAway = busRouteStop.getLong("pre_away");
+                if (preAway >= 0) {
+                    Date timeBus = new Date(preAway * 1000L);
                     DateFormat formatBus = new SimpleDateFormat("mm:ss");
                     txtNextBus.setText(formatBus.format(timeBus));
+                } else {
+                    txtNextBus.setText("");
+                }
+
+                if (preAway >= 0 && preAway <= 60) {
+                    imgBus.setImageResource(R.drawable.imgfindmybus);
+                } else {
+                    imgBus.setImageBitmap(null);
                 }
             } catch (JSONException e) {
-
+                txtStopName.setText("");
+                txtSchedule.setText("");
+                txtETA.setText("");
+                txtNextBus.setText("");
+                imgBus.setImageBitmap(null);
             }
             //return super.getView(position, convertView, parent);
             return convertView;

@@ -89,6 +89,7 @@ public class BusRouteStopFragment extends Fragment implements MbtaServiceDelegat
 
             MbtaService service = MbtaService.sharedService();
             service.getStopsByRoute(mBusRoute.getString("route_id"), this);
+            //service.getPredictionByRoute(mBusRoute.getString("route_id"),false,false,this);
         } catch (JSONException e) {
             mBusRoute = null;
         }
